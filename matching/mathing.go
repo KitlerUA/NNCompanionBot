@@ -15,19 +15,34 @@ type Category struct {
 	QAs         map[string]string
 }
 
-var CM closestmatch.ClosestMatch
-var CMForCategories map[string]closestmatch.ClosestMatch
+var CM *closestmatch.ClosestMatch
+var CMForCategories map[string]*closestmatch.ClosestMatch
+
+var Categories []Category
 
 func PrepareDataForMatching() error {
-	var categories []Category
 	data, err := ioutil.ReadFile(config.Get().MatchingDataFile)
 	if err != nil {
 		loger.Log.Warningf("Cannot find file with matching data: %v", err)
 		return err
 	}
-	if err = json.Unmarshal(data, &categories); err != nil {
+	if err = json.Unmarshal(data, &Categories); err != nil {
 		loger.Log.Warningf("Corrupted data in matching file: %v", err)
 		return err
+	}
+	descriptions := make([]string, 0, len(Categories))
+	for i := range Categories {
+		descriptions = append(descriptions, Categories[i].Description)
+	}
+	bagSizes := []int{2, 3, 4}
+	CM = closestmatch.New(descriptions, bagSizes)
+	CMForCategories = make(map[string]*closestmatch.ClosestMatch)
+	for i := range Categories {
+		questions := make([]string, 0)
+		for j := range Categories[i].QAs {
+			questions = append(questions, j)
+		}
+		CMForCategories[descriptions[i]] = closestmatch.New(questions, bagSizes)
 	}
 	/*c1 := Category{
 		Name:        "General",
