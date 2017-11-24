@@ -1,20 +1,22 @@
 package main
 
 import (
-	"log"
 
 	"gopkg.in/telegram-bot-api.v4"
+	"github.com/KitlerUA/NNCompanionBot/config"
+	"github.com/KitlerUA/NNCompanionBot/loger"
 )
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI("384534122:AAHOA6fm-JQM3d23_7RB1kWKus4aoO_CB5M")
+	bot, err := tgbotapi.NewBotAPI(config.GetConfig().Token)
 	if err != nil {
-		log.Panic(err)
+
+		loger.Log.Panic(err)
 	}
 
 	bot.Debug = true
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	loger.Log.Infof("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -26,7 +28,7 @@ func main() {
 			continue
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		loger.Log.Infof("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 		msg.ReplyToMessageID = update.Message.MessageID
