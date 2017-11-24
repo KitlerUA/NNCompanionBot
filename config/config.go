@@ -11,12 +11,13 @@ const defaultConfigFilename = "config.json"
 
 type Config struct {
 	Token string `json:"token"`
+	MatchingDataFile string `json:"matching_data_file"`
 }
 
 var config *Config
 var once sync.Once
 
-func GetConfig() Config{
+func Get() Config{
 	once.Do(readConfigFile)
 	return *config
 }
