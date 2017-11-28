@@ -16,14 +16,13 @@ func ComputeAnswer(message *tbot.Message) {
 			loger.Log.Warning("Recovered after message: ", message)
 		}
 	}()
-	k := matching.CMForCategories[matching.CM.Closest(message.Vars["text"])].Closest(message.Vars["text"])
-	for i := range matching.Categories {
-		for j := range matching.Categories[i].QAs {
-			if k == j {
-				message.Reply(matching.Categories[i].QAs[j])
-				loger.Log.Info("To ", message.From.UserName, " ", message.From.FirstName, " ", message.From.LastName, " : ", matching.Categories[i].QAs[j])
-				break
-			}
-		}
+	rep := matching.QAGeneral[matching.CMGeneral.Closest(message.Text())]
+	if rep != "" {
+		message.Reply(rep)
+	} else {
+		message.Reply("I have nothing to say")
 	}
+
+	loger.Log.Info("To ", message.From.UserName, " ", message.From.FirstName, " ", message.From.LastName, " : ", rep)
+
 }

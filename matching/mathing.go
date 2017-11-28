@@ -9,16 +9,8 @@ import (
 	"github.com/schollz/closestmatch"
 )
 
-type Category struct {
-	Name        string
-	Description string
-	QAs         map[string]string
-}
-
-var CM *closestmatch.ClosestMatch
-var CMForCategories map[string]*closestmatch.ClosestMatch
-
-var Categories []Category
+var CMGeneral *closestmatch.ClosestMatch
+var QAGeneral map[string]string
 
 func PrepareDataForMatching() error {
 	data, err := ioutil.ReadFile(config.Get().MatchingDataFile)
@@ -26,40 +18,16 @@ func PrepareDataForMatching() error {
 		loger.Log.Warningf("Cannot find file with matching data: %v", err)
 		return err
 	}
-	if err = json.Unmarshal(data, &Categories); err != nil {
+	QAGeneral = make(map[string]string)
+	if err = json.Unmarshal(data, &QAGeneral); err != nil {
 		loger.Log.Warningf("Corrupted data in matching file: %v", err)
 		return err
 	}
-	descriptions := make([]string, 0, len(Categories))
-	for i := range Categories {
-		descriptions = append(descriptions, Categories[i].Description)
+	generalListOfQ := make([]string, 0, len(QAGeneral))
+	bagSizes := []int{3, 4, 5}
+	for i := range QAGeneral {
+		generalListOfQ = append(generalListOfQ, i)
 	}
-	bagSizes := []int{2, 3, 4}
-	CM = closestmatch.New(descriptions, bagSizes)
-	CMForCategories = make(map[string]*closestmatch.ClosestMatch)
-	for i := range Categories {
-		questions := make([]string, 0)
-		for j := range Categories[i].QAs {
-			questions = append(questions, j)
-		}
-		CMForCategories[descriptions[i]] = closestmatch.New(questions, bagSizes)
-	}
-	/*c1 := Category{
-		Name:        "General",
-		Description: "справи тебе привіт розумієш",
-		QAs: map[string]string{
-			"привіт":            "Привіт!",
-			"як у тебе справи?": "Все чудово!",
-			"ти мене розумієш?": "Я тебе розумію",
-		},
-	}
-	categories = append(categories, c1)
-	data, err := json.Marshal(&categories)
-	if err != nil {
-		loger.Log.Warningf("Cannot marshal matching data: %v", err)
-	}
-	if err = ioutil.WriteFile(config.Get().MatchingDataFile, data, 0666); err != nil {
-		loger.Log.Warningf("Cannot write file: %v", err)
-	}*/
+	CMGeneral = closestmatch.New(generalListOfQ, bagSizes)
 	return nil
 }
